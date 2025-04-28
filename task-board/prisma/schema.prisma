@@ -17,9 +17,10 @@ datasource db {
 model Task {
   id        String  @id @default(uuid())
   title     String
-  assignedTo String?
   status    TaskStatus @default(TO_DO)
   createdAt DateTime @default(now())
+  assignedToId    String?
+  assignedTo      User? @relation(fields: [assignedToId], references: [id], onDelete: Cascade)
 
 }
 
@@ -59,12 +60,17 @@ model Session {
 
 model User {
     id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
+    email         String    @unique
+    firstName     String
+    lastName      String
+    fullName      String? 
+    age           Int
+    gender        String
+    salaryAmount  Float
+    salaryCurrency String   
+    sessions     Session[]
     accounts      Account[]
-    sessions      Session[]
+    assignedTasks         Task[]
 }
 
 model VerificationToken {
