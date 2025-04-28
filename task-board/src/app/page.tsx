@@ -5,6 +5,8 @@ import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 import type { Task } from "~/types/task";
 import type { RouterOutputs } from "~/trpc/react";
+import 'antd/dist/reset.css';
+import { TaskBoard } from "./_components/board";
 
 export default async function Home() {
   const tasks = await api.task.getAll();
@@ -46,7 +48,7 @@ export default async function Home() {
             </Link>
           </div>
 
-<div>
+{/* <div>
           <h2 className="text-3xl font-bold">Latest Posts</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
             {tasks.map((task: TaskOutput) => (
@@ -55,8 +57,18 @@ export default async function Home() {
 </p>            
 ))}
           </div>
-</div>
+</div> */}
+
+          <div>
+            <Link
+              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
+              href="/board"
+              target="_blank"
+            >
+              <h2 className="text-3xl font-bold" >View Tasks</h2>
+            </Link>
         </div>
+    </div>
       </main>
     </HydrateClient>
   );
