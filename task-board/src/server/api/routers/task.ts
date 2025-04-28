@@ -7,7 +7,7 @@ import { TaskStatus } from "~/types/task";
 const taskSchema = z.object({
     id: z.string(),
     title: z.string(),
-    assignedTo: z.string().nullable(),
+    assignedToId: z.string().nullable(),
     status: z.nativeEnum(TaskStatus),
     createdAt: z.date(),
   });
@@ -18,7 +18,7 @@ export const taskRouter = createTRPCRouter({
       .input(
         z.object({
           title: z.string().min(3),
-          assignedTo: z.string().optional(),
+          assignedToId: z.string().optional(),
           status: z.nativeEnum(TaskStatus).default(TaskStatus.TO_DO),
         })
       )
@@ -42,7 +42,23 @@ export const taskRouter = createTRPCRouter({
               }))
         );
       }),
-  
+
+      getByUser: publicProcedure
+      .input(z.object({ userId: z.string() }))
+      .output(z.array(taskSchema))
+      .query(async ({ input }) => {
+        return await db.task.findMany({
+          where: {
+            assignedToId: input.userId,
+          },
+        }).then(tasks =>
+            tasks.map(task => ({
+                ...task,
+                status: task.status as TaskStatus,
+              }))
+        );
+      }),
+      
       update: publicProcedure
       .input(z.object({
         id: z.string(),
