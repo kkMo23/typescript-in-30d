@@ -1,92 +1,82 @@
 "use client";
-import { Card, Col, Row, Dropdown, Spin } from 'antd';
+import { Card, Row, Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import { api } from '~/trpc/react';
-import { type User, type Task } from '@prisma/client';
-// import { useCurrentUser } from '~/hooks/useCurrentUser';
+import { type User, type Task, TaskStatus } from '@prisma/client';
+import { StatusColumn, StyledButton, StyledDropDown, TaskCard, HeaderRow, PageContainer, Title } from './board.style';
 
 export const TaskBoard = () => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [chosenUser, setChosenUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [renderTasks, setRenderTasks] = useState<boolean>(false);
+  const [mappedUsers, setMappedUsers] = useState<{ key: string; label: string | null }[]>([]);
+  const statusOptions = Object.keys(TaskStatus) as TaskStatus[];
 
-    //state variables
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [chosenUser, setChosenUser] = useState("");
-    const [users, setUsers] = useState<User[]>([]); 
-    const [renderedTasks, setRenderedTasks] = useState<boolean>(false);
-    // for when users can log in
-    // const currentUser  = useCurrentUser();
+  const { data: userData } = api.user.getAll.useQuery();
 
-    // functions
-    const filteredByUserAndStatus = (userId: string) => {
-        const [data] = api.task.getByUser.useSuspenseQuery({
-        userId: userId,
-        });
-        if (data) {
-            setTasks(data);
-        }
-        setLoading(false);
-    };
+  const { data: taskData } = api.task.getByUser.useQuery(
+    { userId: chosenUser?.id ?? '' },
+    { enabled: !!chosenUser }
+  );
 
-    const getUsers = () => {
-        const { data } = api.user.getAll.useQuery();
-        if (data) {
-            setUsers(data);
-        }
-    };
-    // hooks
-    useEffect(() => {
-        if (chosenUser) {
-            setLoading(true);
-            filteredByUserAndStatus(chosenUser)
-            setRenderedTasks(true);
-        }
-    }, [chosenUser]);
+  useEffect(() => {
+    if (userData) {
+      setUsers(userData);
+      setMappedUsers(userData.map((u) => ({
+        key: u.id,
+        label: `${u.firstName} ${u.lastName}`,
+      })));
+    }
+  }, [userData]);
 
-    useEffect(() => {
-        getUsers();
-        setRenderedTasks(false);
-        setLoading(false);
-    }, []) 
+  useEffect(() => {
+    if (taskData) {
+      setTasks(taskData);
+    }
+  }, [taskData]);
 
-    // component
+  return (
+    <PageContainer>
+      <HeaderRow>
+        <Title level={2}>
+          {renderTasks && chosenUser
+            ? `Task Board for ${chosenUser.firstName} ${chosenUser.lastName}`
+            : 'Task Board'}
+        </Title>
+        <StyledDropDown
+          arrow
+          menu={{
+            items: mappedUsers,
+            onClick: (e) => {
+              setRenderTasks(true);
+              const selectedUser = users.find((u) => u.id === e.key);
+              setChosenUser(selectedUser ?? null);
+            },
+          }}
+        >
+          <StyledButton type="default">Please select a user</StyledButton>
+        </StyledDropDown>
+      </HeaderRow>
 
-    return (
-        <>
-            <Col
-                title='Please select a user'
-            >
-                <Dropdown
-                    menu={{
-                        items: users.map((user) => ({
-                            key: user.id,
-                            label: user.fullName,
-                        })),
-                        onClick: (e) => {
-                            setChosenUser(e.key);
-                        },
-                    }}
-                />
-                {loading && (
-                    <>
-                          <Spin tip="Loading" size="small" />
-                    </>
-                )}
-                {renderedTasks && (
-                    tasks.map((task) => (
-                        <Col title={task.status} key={task.id}>
-                            <Row>
-                                <Card
-                                    title={task.title}
-                                    style={{ width: 300, margin: '10px' }}
-                                >
-                                    <p>Status: {task.status}</p>
-                                </Card>
-                            </Row>
-                        </Col>
-                    ))
-                )}
-            </ Col>
-        </>
-    )
+      {loading && <Spin tip="Loading" size="large" />}
 
-}
+      {renderTasks && (
+        <Row gutter={[24, 24]}>
+          {statusOptions.map((status) => (
+            <StatusColumn key={status} span={8} status={status}>
+              <Card title={status.replace('_', ' ')} bordered={false}>
+                {tasks.filter((t) => t.status === status).map((task) => (
+                  <TaskCard key={task.id} title={task.title}>
+                    <p>Created: {new Date(task.createdAt).toLocaleDateString()}</p>
+                  </TaskCard>
+                ))}
+              </Card>
+            </StatusColumn>
+          ))}
+        </Row>
+      )}
+    </PageContainer>
+  );
+};
