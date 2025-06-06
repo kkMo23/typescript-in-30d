@@ -1,7 +1,7 @@
 "use client";
 import { Card, Row, Spin } from 'antd';
 import { useEffect, useState } from 'react';
-import { api } from '~/trpc/react';
+import { api } from '@/trpc/react';
 import { type User, type Task, TaskStatus } from '@prisma/client';
 import {
   StatusColumn,

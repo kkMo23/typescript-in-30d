@@ -10,3 +10,4 @@ node_modules/
 # Compiled JavaScript
 *.js
 *.js.map
+.vercel

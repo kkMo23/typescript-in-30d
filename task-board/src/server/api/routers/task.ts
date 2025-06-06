@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { db } from "@/server/db";
-import { TaskStatus } from "~/types/task";
+import { TaskStatus } from "@/types/task";
 
 const taskSchema = z.object({
     id: z.string(),

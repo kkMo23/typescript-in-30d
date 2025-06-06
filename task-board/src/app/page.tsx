@@ -1,19 +1,19 @@
 import Link from "next/link";
 
-import { LatestPost } from "~/app/_components/post";
-import { auth } from "~/server/auth";
+// import { LatestPost } from "~/app/_components/post";
+// import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
-import type { Task } from "~/types/task";
-import type { RouterOutputs } from "~/trpc/react";
+// import type { Task } from "~/types/task";
+// import type { RouterOutputs } from "~/trpc/react";
 import 'antd/dist/reset.css';
-import { TaskBoard } from "./_components/board";
+// import { TaskBoard } from "./_components/board";
 
 export default async function Home() {
-  const tasks = await api.task.getAll();
+//   const tasks = await api.task.getAll();
 
   // type HelloOutput = RouterOutputs['example']['hello']
 
-  type TaskOutput = RouterOutputs["task"]["getAll"][number];
+//   type TaskOutput = RouterOutputs["task"]["getAll"][number];
 
 
   return (
