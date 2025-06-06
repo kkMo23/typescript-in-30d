@@ -19,7 +19,7 @@
     "preview": "next build && next start",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed-users-and-tasks.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",
