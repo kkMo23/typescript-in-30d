@@ -11,3 +11,6 @@ node_modules/
 *.js
 *.js.map
 .vercel
+
+!next.config.js
+!env.js
